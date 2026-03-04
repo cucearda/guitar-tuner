@@ -154,8 +154,8 @@ function TuningSelector({ frequency }) {
             <DrawerTitle>
               Select note for String {editingStringIndex !== null ? 6 - editingStringIndex : ""}
             </DrawerTitle>
+            <DrawerCloseTrigger />
           </DrawerHeader>
-          <DrawerCloseTrigger />
           <DrawerBody overflowY="auto">
             <VStack align="stretch">
               {GUITAR_NOTE_NAMES.map((note) => (
