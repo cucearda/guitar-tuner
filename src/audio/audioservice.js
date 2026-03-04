@@ -10,35 +10,35 @@ const init = async (setFrequency) => {
 
   if (!navigator?.mediaDevices?.getUserMedia) {
     alert("Sorry, getUserMedia is required for the app.");
-    return;
+    return null;
   }
 
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     const source = audioContext.createMediaStreamSource(stream);
     source.connect(analyser);
-    const mediaRecorder = new MediaRecorder(stream);
-    let chunks = [];
-    mediaRecorder.ondataavailable = (event) => {
-      chunks.push(event.data);
-    };
-
-    mediaRecorder.start();
 
     var bufferLength = analyser.fftSize;
     var buffer = new Float32Array(bufferLength);
+    let rafId;
 
     const detect = () => {
       analyser.getFloatTimeDomainData(buffer);
       var autoCorrelateValue = autoCorrelate(buffer, audioContext.sampleRate);
       setFrequency(autoCorrelateValue);
-      requestAnimationFrame(detect);
+      rafId = requestAnimationFrame(detect);
     };
+    rafId = requestAnimationFrame(detect);
 
-    requestAnimationFrame(detect);
-
+    return () => {
+      cancelAnimationFrame(rafId);
+      stream.getTracks().forEach((track) => track.stop());
+      audioContext.close();
+      setFrequency(null);
+    };
   } catch (err) {
     console.log(err);
+    return null;
   }
 };
 
