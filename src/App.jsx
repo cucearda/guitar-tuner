@@ -1,11 +1,12 @@
 import { useState, useRef } from "react";
 import { init } from "./audio/audioservice";
-import { TuningSelector } from "./components/TuningSelector";
+import TunerLayout from "./components/TunerLayout";
 import { Stack, Button } from "@chakra-ui/react";
 
 function App() {
   const [frequency, setFrequency] = useState(null);
   const [isListening, setIsListening] = useState(false);
+  const [analyser, setAnalyser] = useState(null)
   const stopRef = useRef(null);
 
   const handleClick = async () => {
@@ -14,7 +15,7 @@ function App() {
       stopRef.currentStopFunction = null;
       setIsListening(false);
     } else {
-      const stop = await init(setFrequency);
+      const stop = await init(setFrequency, setAnalyser);
       if (stop) {
         stopRef.currentStopFunction = stop;
         setIsListening(true);
@@ -27,7 +28,7 @@ function App() {
       <Button onClick={handleClick} background={isListening ? "green.400" : "red.400"} >
         {isListening ? "Stop Microphone" : "Start Microphone"}
       </Button>
-      <TuningSelector frequency={frequency} />
+      <TunerLayout frequency={frequency} analyser={analyser} />
     </Stack>
   );
 }

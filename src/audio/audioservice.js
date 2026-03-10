@@ -1,7 +1,7 @@
 const noteStrings = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"];
 
 
-const init = async (setFrequency) => {
+const init = async (setFrequency, setAnalyser) => {
   var audioContext = new (window.AudioContext || window.webkitAudioContext)();
   var analyser = audioContext.createAnalyser();
   analyser.minDecibels = -100;
@@ -17,6 +17,8 @@ const init = async (setFrequency) => {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     const source = audioContext.createMediaStreamSource(stream);
     source.connect(analyser);
+
+    setAnalyser(analyser);
 
     var bufferLength = analyser.fftSize;
     var buffer = new Float32Array(bufferLength);

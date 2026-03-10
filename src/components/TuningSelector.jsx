@@ -1,18 +1,30 @@
-import { useState } from "react";
-import { Box, Button, HStack, VStack, Text, DrawerBackdrop, DrawerBody, DrawerCloseTrigger, DrawerContent, DrawerHeader, DrawerRoot, DrawerTitle } from "@chakra-ui/react";
+import { useState, useEffect } from "react";
+import {
+  Button,
+  HStack,
+  VStack,
+  Text,
+  DrawerBackdrop,
+  DrawerBody,
+  DrawerCloseTrigger,
+  DrawerContent,
+  DrawerHeader,
+  DrawerRoot,
+  DrawerTitle,
+} from "@chakra-ui/react";
 import {
   GUITAR_TUNINGS,
   GUITAR_NOTES,
   GUITAR_NOTE_NAMES,
 } from "../note_constants/guitar_notes";
-import { FrequencyBar } from "./FrequencyBar";
 
-function TuningSelector({ frequency }) {
+function TuningSelector({ onTargetChange }) {
   const [selectedTuning, setSelectedTuning] = useState(null);
   const [selectedString, setSelectedString] = useState(null);
-  const [editCustomTuning, setEditCustomTuning] = useState(true)
-  const [customTuning, setCustomTuning] = useState(GUITAR_TUNINGS.Standard)
+  const [editCustomTuning, setEditCustomTuning] = useState(true);
+  const [customTuning, setCustomTuning] = useState(GUITAR_TUNINGS.Standard);
   const [editingStringIndex, setEditingStringIndex] = useState(null);
+
   const handleTuningSelect = (tuning) => {
     setSelectedTuning(tuning);
     setSelectedString(null);
@@ -33,6 +45,10 @@ function TuningSelector({ frequency }) {
     noteIndex !== -1 && noteIndex + 2 < GUITAR_NOTE_NAMES.length
       ? GUITAR_NOTES[GUITAR_NOTE_NAMES[noteIndex + 2]]
       : null;
+
+  useEffect(() => {
+    onTargetChange?.({ targetHz, minHz, maxHz });
+  }, [targetHz, minHz, maxHz]);
 
   const handleCustomString = (index) => {
     if (editCustomTuning) {
@@ -93,6 +109,7 @@ function TuningSelector({ frequency }) {
           ))}
         </VStack>
       )}
+
       {/* Special panel for Custom Tuning*/}
       {selectedTuning === "Custom" && (
         <VStack
@@ -121,8 +138,12 @@ function TuningSelector({ frequency }) {
               key={index}
               variant={
                 editCustomTuning
-                  ? editingStringIndex === index ? "solid" : "outline"
-                  : selectedString === index ? "solid" : "outline"
+                  ? editingStringIndex === index
+                    ? "solid"
+                    : "outline"
+                  : selectedString === index
+                    ? "solid"
+                    : "outline"
               }
               onClick={() => handleCustomString(index)}
             >
@@ -132,15 +153,6 @@ function TuningSelector({ frequency }) {
         </VStack>
       )}
 
-      {/* FrequencyBar — shows when a string is selected */}
-      {targetHz && (
-        <FrequencyBar
-          frequency={frequency}
-          targetFrequency={targetHz}
-          minHz={minHz}
-          maxHz={maxHz}
-        />
-      )}
       <DrawerRoot
         open={editingStringIndex !== null}
         onOpenChange={(details) => {
@@ -152,7 +164,8 @@ function TuningSelector({ frequency }) {
         <DrawerContent>
           <DrawerHeader>
             <DrawerTitle>
-              Select note for String {editingStringIndex !== null ? 6 - editingStringIndex : ""}
+              Select note for String{" "}
+              {editingStringIndex !== null ? 6 - editingStringIndex : ""}
             </DrawerTitle>
             <DrawerCloseTrigger />
           </DrawerHeader>
