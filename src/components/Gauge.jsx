@@ -1,8 +1,24 @@
 import React from 'react'
 
+const COLOR = '#2d3a4a'
+
 export default function Gauge({ cents = 0 }) {
   const cx = 100
   const cy = 110
+  const radius = 90
+
+  const ticks = Array.from({ length: 21 }, (_, i) => {
+    const angleDeg = -90 + (-80 + i * 8)
+    const angleRad = angleDeg * (Math.PI / 180)
+    const isCenter = i === 10
+    const isMedium = i % 4 === 0 && !isCenter
+    const len = isCenter ? 16 : isMedium ? 12 : 8
+    const x1 = cx + radius * Math.cos(angleRad)
+    const y1 = cy + radius * Math.sin(angleRad)
+    const x2 = cx + (radius - len) * Math.cos(angleRad)
+    const y2 = cy + (radius - len) * Math.sin(angleRad)
+    return { x1, y1, x2, y2, isCenter }
+  })
 
   return (
     <svg
@@ -11,6 +27,16 @@ export default function Gauge({ cents = 0 }) {
       height="260"
       style={{ display: 'block', margin: '0 auto' }}
     >
+      {ticks.map((t, i) => (
+        <line
+          key={i}
+          x1={t.x1} y1={t.y1}
+          x2={t.x2} y2={t.y2}
+          stroke={COLOR}
+          strokeWidth={t.isCenter ? 2 : 1.2}
+          strokeLinecap="round"
+        />
+      ))}
     </svg>
   )
 }
