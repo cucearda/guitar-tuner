@@ -47,8 +47,8 @@ function TuningSelector({ onTargetChange }) {
       : null;
 
   useEffect(() => {
-    onTargetChange?.({ targetHz, minHz, maxHz });
-  }, [targetHz, minHz, maxHz]);
+    onTargetChange({ targetHz, minHz, maxHz, targetNote });
+  }, [targetHz, minHz, maxHz, targetNote]);
 
   const handleCustomString = (index) => {
     if (editCustomTuning) {
