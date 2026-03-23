@@ -5,7 +5,7 @@ import { FrequencyBar } from "./FrequencyBar";
 import Gauge from "./Gauge";
 import LiveVisualizer from "./LiveVisualizer";
 import { centsDiff } from "../utils/musicUtils";
-import { GUITAR_NOTES, GUITAR_NOTE_NAMES } from "../note_constants/guitar_notes";
+import { GUITAR_NOTES, GUITAR_NOTE_NAMES } from "../audio/note_constants/guitar_notes";
 
 export default function TunerLayout({ frequency, analyser }) {
   const [targetHz, setTargetHz] = useState(null);
