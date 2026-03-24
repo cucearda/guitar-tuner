@@ -16,9 +16,10 @@ import {
   GUITAR_TUNINGS,
   GUITAR_NOTES,
   GUITAR_NOTE_NAMES,
-} from "../note_constants/guitar_notes";
+} from "../audio/note_constants/guitar_notes";
 
 function TuningSelector({ onTargetChange }) {
+  console.log("TuningSelector rendered");
   const [selectedTuning, setSelectedTuning] = useState(null);
   const [selectedString, setSelectedString] = useState(null);
   const [editCustomTuning, setEditCustomTuning] = useState(true);

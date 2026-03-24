@@ -1,8 +1,33 @@
-import React from "react";
+import { useEditable } from "@chakra-ui/react";
+import { centsDiff } from "../utils/musicUtils";
+import { useState } from "react";
+
+import React, { useEffect } from "react";
 
 const BLACK = "#2d3a4a";
 
-export default function Gauge({ cents = 0, downNote = "", upNote = "", targetNote = "" }) {
+export default function Gauge({
+  targetHz = 0,
+  downNote = "",
+  upNote = "",
+  targetNote = "",
+  audioServiceRef = null,
+}) {
+  console.log("Gauge rendered");
+  const [frequency, setFrequency] = useState(null);
+
+  useEffect(() => {
+    audioServiceRef.current.onFrequency(setFrequency);
+  }, [audioServiceRef]);
+  
+  let cents = null
+  if (frequency === -1) {
+    cents = -100
+  }else{
+    cents = Math.max(-100, Math.min(100, centsDiff(targetHz, frequency)));
+  }
+  
+  
   const cx = 100;
   const cy = 110;
   const radius = 90;
@@ -33,7 +58,15 @@ export default function Gauge({ cents = 0, downNote = "", upNote = "", targetNot
       overflow="visible"
       style={{ display: "block", margin: "0 auto" }}
     >
-      <rect x={0} y={0} width="100%" height="100%" fill="green" rx={10} ry={10} />
+      <rect
+        x={0}
+        y={0}
+        width="100%"
+        height="100%"
+        fill="green"
+        rx={10}
+        ry={10}
+      />
       {ticks.map((t, i) => (
         <line
           key={i}
@@ -61,14 +94,35 @@ export default function Gauge({ cents = 0, downNote = "", upNote = "", targetNot
         />
         <circle cx={cx} cy={cy} r={4} fill={"RED"} />
       </g>
-      <text x="10%" y={downNoteY} font-family="Arial" font-size="24" fill={BLACK} text-anchor="end">
-          {downNote}
+      <text
+        x="10%"
+        y={downNoteY}
+        font-family="Arial"
+        font-size="24"
+        fill={BLACK}
+        text-anchor="end"
+      >
+        {downNote}
       </text>
-      <text x="95%" y={upNoteY} fontFamily="Arial" font-size="24" fill={BLACK} text-anchor="start">
-          {upNote}
+      <text
+        x="95%"
+        y={upNoteY}
+        fontFamily="Arial"
+        font-size="24"
+        fill={BLACK}
+        text-anchor="start"
+      >
+        {upNote}
       </text>
-      <text x="50%" y="10%" font-family="Arial" font-size="20" fill={BLACK} textAnchor="middle">
-          {targetNote}
+      <text
+        x="50%"
+        y="10%"
+        font-family="Arial"
+        font-size="20"
+        fill={BLACK}
+        textAnchor="middle"
+      >
+        {targetNote}
       </text>
     </svg>
   );

@@ -1,45 +1,59 @@
-const init = async (setFrequency, setAnalyser) => {
-  var audioContext = new (window.AudioContext || window.webkitAudioContext)();
-  var analyser = audioContext.createAnalyser();
-  analyser.minDecibels = -100;
-  analyser.maxDecibels = -10;
-  analyser.smoothingTimeConstant = 0.85;
-
-  if (!navigator?.mediaDevices?.getUserMedia) {
-    alert("Sorry, getUserMedia is required for the app.");
-    return null;
+class AudioService {
+  constructor() {
+    this.audioContext = null;
+    this.analyser = null;
+    this.frequencyCallback=null;
+    this.analyzerCallback=null;
+    this.stream=null;
+    this.rafId=null;
   }
+  onFrequency(setFrequency) {
+    this.frequencyCallback = setFrequency;
+  }
+  onAnalyzer(setAnalyser) {
+    this.analyzerCallback = setAnalyser;
+  }
+  async start() {
+    this.audioContext = new (
+      window.AudioContext || window.webkitAudioContext
+    )();
+    this.analyser = this.audioContext.createAnalyser();
+    this.analyser.minDecibels = -100;
+    this.analyser.maxDecibels = -10;
+    this.analyser.smoothingTimeConstant = 0.85;
+    if (!navigator?.mediaDevices?.getUserMedia) {
+      alert("Sorry, getUserMedia is required for the app.");
+      return null;
+    }
+    try{
+      this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const source = this.audioContext.createMediaStreamSource(this.stream);
+      source.connect(this.analyser);
 
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const source = audioContext.createMediaStreamSource(stream);
-    source.connect(analyser);
+      var bufferLength = this.analyser.fftSize;
+      var buffer = new Float32Array(bufferLength);
 
-    setAnalyser(analyser);
-
-    var bufferLength = analyser.fftSize;
-    var buffer = new Float32Array(bufferLength);
-    let rafId;
-
-    const detect = () => {
-      analyser.getFloatTimeDomainData(buffer);
-      var autoCorrelateValue = autoCorrelate(buffer, audioContext.sampleRate);
-      setFrequency(autoCorrelateValue);
-      rafId = requestAnimationFrame(detect);
-    };
-    rafId = requestAnimationFrame(detect);
-
-    return () => {
-      cancelAnimationFrame(rafId);
-      stream.getTracks().forEach((track) => track.stop());
-      audioContext.close();
-      setFrequency(null);
-    };
-  } catch (err) {
+      const detect = () => {
+        this.analyser.getFloatTimeDomainData(buffer);
+        var autoCorrelateValue = autoCorrelate(buffer, this.audioContext.sampleRate);
+        this.frequencyCallback(autoCorrelateValue);
+        console.log("AutoCorrelate value:", autoCorrelateValue);
+        this.rafId = requestAnimationFrame(detect);
+      };
+      this.rafId = requestAnimationFrame(detect);
+    } catch (err) {
     console.log(err);
     return null;
+    }
   }
-};
+
+  stop() {
+    cancelAnimationFrame(this.rafId);
+    this.stream.getTracks().forEach((track) => track.stop());
+    this.audioContext.close();
+    this.frequencyCallback(null);
+  }
+}
 
 // Must be called on analyser.getFloatTimeDomainData and audioContext.sampleRate
 // From https://github.com/cwilso/PitchDetect/pull/23
@@ -126,4 +140,4 @@ function autoCorrelate(buffer, sampleRate) {
   return sampleRate / T0;
 }
 
-export { init };
+export { AudioService };

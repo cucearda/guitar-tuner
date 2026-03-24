@@ -1,6 +1,7 @@
 import { useRef, useEffect } from 'react';
 
 export default function LiveVisualizer({ analyser }) {
+  console.log("LiveVisualizer rendered");
   const canvasRef = useRef(null);
 
   const containerRef = useRef(null);
