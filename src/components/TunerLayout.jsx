@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Box, HStack, VStack, Button } from "@chakra-ui/react";
+import { Box, HStack, VStack, Button, Flex } from "@chakra-ui/react";
 import { TuningSelector } from "./TuningSelector";
 import { FrequencyBar } from "./FrequencyBar";
 import Gauge from "./Gauge";
@@ -34,54 +34,57 @@ export default function TunerLayout() {
       audioServiceRef.current.start();
       setIsListening(true);
     }
-  }
-
+  };
 
   const hasTarget = targetHz != null;
 
   return (
-    <HStack align="flex-start" height="100vh" gap="0">
-      <TuningSelector onTargetChange={handleTargetChange} />
-      {hasTarget && (
-        <VStack p="4" gap="4" align="stretch" flex="1" height="100%">
-          <Box
-            p="4"
-            borderWidth="1px"
-            borderRadius="md"
-            flex="1"
-            minH="0"
-            fill="brown"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            overflow="hidden"
-          >
-            <Gauge
-              targetHz={targetHz}
-              downNote={
-                GUITAR_NOTE_NAMES[GUITAR_NOTE_NAMES.indexOf(targetNote) - 1] ||
-                ""
-              }
-              upNote={
-                GUITAR_NOTE_NAMES[GUITAR_NOTE_NAMES.indexOf(targetNote) + 1] ||
-                ""
-              }
-              targetNote={targetNote}
-              audioServiceRef={audioServiceRef}
-            />
-          </Box>
+    <Flex direction="column" height="100vh" overflow="hidden">
+      <HStack align="flex-start" flex="1" minH="0" gap="0">
+        <TuningSelector onTargetChange={handleTargetChange} />
+        {hasTarget && (
+          <VStack p="4" gap="4" align="stretch" flex="1" height="100%">
+            <Box
+              p="4"
+              borderWidth="1px"
+              borderRadius="md"
+              flex="1"
+              minH="0"
+              fill="brown"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              overflow="hidden"
+            >
+              <Gauge
+                targetHz={targetHz}
+                downNote={
+                  GUITAR_NOTE_NAMES[
+                    GUITAR_NOTE_NAMES.indexOf(targetNote) - 1
+                  ] || ""
+                }
+                upNote={
+                  GUITAR_NOTE_NAMES[
+                    GUITAR_NOTE_NAMES.indexOf(targetNote) + 1
+                  ] || ""
+                }
+                targetNote={targetNote}
+                audioServiceRef={audioServiceRef}
+              />
+            </Box>
 
-          {/* <Box p="4" borderWidth="1px" borderRadius="md" flex="1" minH="0">
+            {/* <Box p="4" borderWidth="1px" borderRadius="md" flex="1" minH="0">
             <LiveVisualizer analyser={analyser} ref={audioServiceRef} />
           </Box> */}
-        </VStack>
-      )}
+          </VStack>
+        )}
+      </HStack>
       <Button
         onClick={handleMicrophoneStart}
         background={isListening ? "green.400" : "red.400"}
       >
         {isListening ? "Stop Microphone" : "Start Microphone"}
       </Button>
-    </HStack>
+    </Flex>
   );
 }

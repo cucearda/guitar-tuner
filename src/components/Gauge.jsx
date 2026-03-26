@@ -58,15 +58,6 @@ export default function Gauge({
       overflow="visible"
       style={{ display: "block", margin: "0 auto" }}
     >
-      <rect
-        x={0}
-        y={0}
-        width="100%"
-        height="100%"
-        fill="green"
-        rx={10}
-        ry={10}
-      />
       {ticks.map((t, i) => (
         <line
           key={i}
