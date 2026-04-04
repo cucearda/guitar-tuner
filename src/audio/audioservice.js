@@ -47,6 +47,7 @@ class AudioService {
     this.analyzerCallback=null;
     this.stream=null;
     this.rafId=null;
+    this.stabilizer = new FrequencyStabilizer();
   }
   onFrequency(setFrequency) {
     this.frequencyCallback = setFrequency;
@@ -77,8 +78,7 @@ class AudioService {
       const detect = () => {
         this.analyser.getFloatTimeDomainData(buffer);
         var autoCorrelateValue = autoCorrelate(buffer, this.audioContext.sampleRate);
-        this.frequencyCallback(autoCorrelateValue);
-        console.log("AutoCorrelate value:", autoCorrelateValue);
+        this.frequencyCallback(this.stabilizer.process(autoCorrelateValue));
         this.rafId = requestAnimationFrame(detect);
       };
       this.rafId = requestAnimationFrame(detect);
@@ -93,6 +93,10 @@ class AudioService {
     this.stream.getTracks().forEach((track) => track.stop());
     this.audioContext.close();
     this.frequencyCallback(null);
+  }
+
+  resetStabilizer() {
+    this.stabilizer.reset();
   }
 }
 
