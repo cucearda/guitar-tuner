@@ -52,6 +52,9 @@ class AudioService {
     this.rafId=null;
     this.stabilizer = new FrequencyStabilizer();
   }
+  setTargetHz(hz) {
+    this.targetHz = hz;
+  }
   onFrequency(setFrequency) {
     this.frequencyCallback = setFrequency;
   }
@@ -80,7 +83,7 @@ class AudioService {
 
       const detect = () => {
         this.analyser.getFloatTimeDomainData(buffer);
-        var autoCorrelateValue = autoCorrelate(buffer, this.audioContext.sampleRate);
+        var autoCorrelateValue = autoCorrelate(buffer, this.audioContext.sampleRate, this.targetHz);
         this.frequencyCallback(this.stabilizer.process(autoCorrelateValue));
         console.log(`NOSTABIL ${autoCorrelateValue}`)
         console.log(`Stabilized ${this.stabilizer.process(autoCorrelateValue)}`)
@@ -108,7 +111,7 @@ class AudioService {
 
 // Must be called on analyser.getFloatTimeDomainData and audioContext.sampleRate
 // From https://github.com/cwilso/PitchDetect/pull/23
-function autoCorrelate(buffer, sampleRate) {
+function autoCorrelate(buffer, sampleRate, targetHz) {
   // Perform a quick root-mean-square to see if we have enough signal
   var SIZE = buffer.length;
   var sumOfSquares = 0;
@@ -173,29 +176,43 @@ function autoCorrelate(buffer, sampleRate) {
 
   var T0 = maxIndex;
 
-  // Check sub-harmonics: if a peak at 2× or 3× the lag (i.e. half or third
-  // the frequency) is reasonably strong, it's likely the true fundamental and
-  // our current pick is a harmonic.
+  // Collect candidate frequencies: the raw peak and its sub-harmonics.
+  // Pick the one closest to targetHz (if provided), otherwise prefer the
+  // lowest that's strong enough (fundamental over harmonic).
   var HARMONIC_THRESHOLD = 0.85;
+  var candidates = [{ lag: T0, strength: maxValue }];
   for (var mult = 2; mult <= 3; mult++) {
     var subIndex = Math.round(T0 * mult);
-    if (subIndex < SIZE) {
-      // Find the best peak near the expected sub-harmonic lag
-      var searchStart = Math.max(d, subIndex - 4);
-      var searchEnd = Math.min(SIZE - 1, subIndex + 4);
-      var bestSub = -1;
-      var bestSubIndex = subIndex;
-      for (var si = searchStart; si <= searchEnd; si++) {
-        if (c[si] > bestSub) {
-          bestSub = c[si];
-          bestSubIndex = si;
-        }
-      }
-      if (bestSub > maxValue * HARMONIC_THRESHOLD) {
-        T0 = bestSubIndex;
-        maxValue = bestSub;
+    if (subIndex >= SIZE) continue;
+    var searchStart = Math.max(d, subIndex - 4);
+    var searchEnd = Math.min(SIZE - 1, subIndex + 4);
+    var bestSub = -1;
+    var bestSubIndex = subIndex;
+    for (var si = searchStart; si <= searchEnd; si++) {
+      if (c[si] > bestSub) {
+        bestSub = c[si];
+        bestSubIndex = si;
       }
     }
+    if (bestSub > maxValue * HARMONIC_THRESHOLD) {
+      candidates.push({ lag: bestSubIndex, strength: bestSub });
+    }
+  }
+
+  if (targetHz && candidates.length > 1) {
+    // Pick the candidate whose frequency is closest to the target
+    var bestDist = Infinity;
+    for (var ci = 0; ci < candidates.length; ci++) {
+      var candidateHz = sampleRate / candidates[ci].lag;
+      var dist = Math.abs(candidateHz - targetHz);
+      if (dist < bestDist) {
+        bestDist = dist;
+        T0 = candidates[ci].lag;
+      }
+    }
+  } else if (candidates.length > 1) {
+    // No target: prefer the lowest frequency (largest lag)
+    T0 = candidates[candidates.length - 1].lag;
   }
 
   // Parabolic interpolation for precision

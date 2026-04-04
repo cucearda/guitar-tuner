@@ -21,6 +21,7 @@ export default function TunerLayout() {
 
   const handleTargetChange = ({ targetHz, minHz, maxHz, targetNote }) => {
     audioServiceRef.current.resetStabilizer();
+    audioServiceRef.current.setTargetHz(targetHz);
     setTargetHz(targetHz);
     setMinHz(minHz);
     setMaxHz(maxHz);
