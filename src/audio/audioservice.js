@@ -1,3 +1,44 @@
+export class FrequencyStabilizer {
+  constructor({ bufferSize = 8, stabilityThreshold = 15 } = {}) {
+    this.bufferSize = bufferSize;
+    this.stabilityThreshold = stabilityThreshold;
+    this.buffer = [];
+    this.lastStableFrequency = null;
+  }
+
+  process(rawFrequency) {
+    if (rawFrequency === -1) {
+      return -1;
+    }
+
+    this.buffer.push(rawFrequency);
+    if (this.buffer.length > this.bufferSize) {
+      this.buffer.shift();
+    }
+
+    if (this.buffer.length < this.bufferSize) {
+      return this.lastStableFrequency ?? -1;
+    }
+
+    const sorted = [...this.buffer].sort((a, b) => a - b);
+    const median = sorted[Math.floor(sorted.length / 2)];
+    const allStable = this.buffer.every(
+      (f) => Math.abs(1200 * Math.log2(f / median)) <= this.stabilityThreshold
+    );
+
+    if (allStable) {
+      this.lastStableFrequency = median;
+    }
+
+    return this.lastStableFrequency ?? -1;
+  }
+
+  reset() {
+    this.buffer = [];
+    this.lastStableFrequency = null;
+  }
+}
+
 class AudioService {
   constructor() {
     this.audioContext = null;
@@ -66,7 +107,7 @@ function autoCorrelate(buffer, sampleRate) {
     sumOfSquares += val * val;
   }
   var rootMeanSquare = Math.sqrt(sumOfSquares / SIZE);
-  if (rootMeanSquare < 0.01) {
+  if (rootMeanSquare < 0.005) {
     return -1;
   }
 
