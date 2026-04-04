@@ -82,6 +82,8 @@ class AudioService {
         this.analyser.getFloatTimeDomainData(buffer);
         var autoCorrelateValue = autoCorrelate(buffer, this.audioContext.sampleRate);
         this.frequencyCallback(this.stabilizer.process(autoCorrelateValue));
+        console.log(`NOSTABIL ${autoCorrelateValue}`)
+        console.log(`Stabilized ${this.stabilizer.process(autoCorrelateValue)}`)
         this.rafId = requestAnimationFrame(detect);
       };
       this.rafId = requestAnimationFrame(detect);
@@ -171,11 +173,32 @@ function autoCorrelate(buffer, sampleRate) {
 
   var T0 = maxIndex;
 
-  // Not as sure about this part, don't @ me
-  // From the original author:
-  // interpolation is parabolic interpolation. It helps with precision. We suppose that a parabola pass through the
-  // three points that comprise the peak. 'a' and 'b' are the unknowns from the linear equation system and b/(2a) is
-  // the "error" in the abscissa. Well x1,x2,x3 should be y1,y2,y3 because they are the ordinates.
+  // Check sub-harmonics: if a peak at 2× or 3× the lag (i.e. half or third
+  // the frequency) is reasonably strong, it's likely the true fundamental and
+  // our current pick is a harmonic.
+  var HARMONIC_THRESHOLD = 0.85;
+  for (var mult = 2; mult <= 3; mult++) {
+    var subIndex = Math.round(T0 * mult);
+    if (subIndex < SIZE) {
+      // Find the best peak near the expected sub-harmonic lag
+      var searchStart = Math.max(d, subIndex - 4);
+      var searchEnd = Math.min(SIZE - 1, subIndex + 4);
+      var bestSub = -1;
+      var bestSubIndex = subIndex;
+      for (var si = searchStart; si <= searchEnd; si++) {
+        if (c[si] > bestSub) {
+          bestSub = c[si];
+          bestSubIndex = si;
+        }
+      }
+      if (bestSub > maxValue * HARMONIC_THRESHOLD) {
+        T0 = bestSubIndex;
+        maxValue = bestSub;
+      }
+    }
+  }
+
+  // Parabolic interpolation for precision
   var x1 = c[T0 - 1];
   var x2 = c[T0];
   var x3 = c[T0 + 1];
