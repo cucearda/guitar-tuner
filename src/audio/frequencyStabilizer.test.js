@@ -81,8 +81,8 @@ describe("FrequencyStabilizer", () => {
     const s2 = new FrequencyStabilizer({ bufferSize: 8, stabilityThreshold: 15 });
     [438, 439, 440, 441, 442, 439, 440, 441].forEach(f => s2.process(f));
     const result = s2.process(440);
-    // All within 15 cents of each other — median of [438,439,439,440,440,441,441,442,440]
-    // For the 8-reading buffer, median should be ~440 (average of 4th and 5th sorted elements)
+    // After 9th call, 438 is shifted out — buffer holds [439,440,441,442,439,440,441,440]
+    // sorted: [439,439,440,440,440,441,441,442] → median = (440+440)/2 = 440
     expect(result).toBeCloseTo(440, 0);
   });
 });
