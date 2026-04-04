@@ -21,7 +21,10 @@ export class FrequencyStabilizer {
     }
 
     const sorted = [...this.buffer].sort((a, b) => a - b);
-    const median = sorted[Math.floor(sorted.length / 2)];
+    const mid = Math.floor(sorted.length / 2);
+    const median = sorted.length % 2 === 0
+      ? (sorted[mid - 1] + sorted[mid]) / 2
+      : sorted[mid];
     const allStable = this.buffer.every(
       (f) => Math.abs(1200 * Math.log2(f / median)) <= this.stabilityThreshold
     );
@@ -89,10 +92,11 @@ class AudioService {
   }
 
   stop() {
+    this.stabilizer.reset();
     cancelAnimationFrame(this.rafId);
-    this.stream.getTracks().forEach((track) => track.stop());
-    this.audioContext.close();
-    this.frequencyCallback(null);
+    this.stream?.getTracks().forEach((track) => track.stop());
+    this.audioContext?.close();
+    this.frequencyCallback?.(null);
   }
 
   resetStabilizer() {
