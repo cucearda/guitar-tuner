@@ -57,6 +57,7 @@ class AudioService {
   }
   onFrequency(setFrequency) {
     this.frequencyCallback = setFrequency;
+    return () => this.frequencyCallback = null
   }
   onAnalyzer(setAnalyser) {
     this.analyzerCallback = setAnalyser;

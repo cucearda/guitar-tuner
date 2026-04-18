@@ -1,19 +1,27 @@
 import { useState } from "react";
 import { Button, HStack, VStack, Text } from "@chakra-ui/react";
 import { intervalNameConstants } from "../models/interval";
+import NavColumn from "./NavColumn";
 
 const OCTAVES = [1, 2, 3, 4, 5, 6, 7];
 const PLAY_ORDERS = ["Ascending", "Descending"];
 
-export default function IntervalTrainerOptions({ selectedIntervals, selectedOctaves, selectedPlayOrder, setSelectedIntervals, setSelectedOctaves, setSelectedPlayOrder }) {
+export default function IntervalTrainerOptions({
+  selectedIntervals,
+  selectedOctaves,
+  selectedPlayOrder,
+  setSelectedIntervals,
+  setSelectedOctaves,
+  setSelectedPlayOrder,
+}) {
   const [openPanel, setOpenPanel] = useState(null); // "intervals" | "octaves" | "playOrder" | null
 
   // Draft selections (local to each panel, committed on Save)
-  const [draftIntervals, setDraftIntervals] = useState([...intervalNameConstants]);
+  const [draftIntervals, setDraftIntervals] = useState([
+    ...intervalNameConstants,
+  ]);
   const [draftOctaves, setDraftOctaves] = useState([3, 4]);
   const [draftPlayOrder, setDraftPlayOrder] = useState("Ascending");
-
-
 
   const handleOpen = (panel) => {
     if (openPanel === panel) {
@@ -38,7 +46,7 @@ export default function IntervalTrainerOptions({ selectedIntervals, selectedOcta
     setDraftIntervals((prev) =>
       prev.includes(interval)
         ? prev.filter((i) => i !== interval)
-        : [...prev, interval]
+        : [...prev, interval],
     );
   };
 
@@ -46,20 +54,15 @@ export default function IntervalTrainerOptions({ selectedIntervals, selectedOcta
     setDraftOctaves((prev) =>
       prev.includes(octave)
         ? prev.filter((o) => o !== octave)
-        : [...prev, octave]
+        : [...prev, octave],
     );
   };
 
   return (
     <HStack align="flex-start" height="100%">
       {/* Left nav — option categories */}
-      <VStack
-        p="4"
-        borderRightWidth="1px"
-        height="100%"
-        align="stretch"
-        minW="160px"
-      >
+
+      <NavColumn>
         <Button
           variant={openPanel === "intervals" ? "solid" : "outline"}
           onClick={() => handleOpen("intervals")}
@@ -78,19 +81,14 @@ export default function IntervalTrainerOptions({ selectedIntervals, selectedOcta
         >
           Play Order
         </Button>
-      </VStack>
+      </NavColumn>
 
       {/* Intervals panel */}
       {openPanel === "intervals" && (
-        <VStack
-          p="4"
-          borderRightWidth="1px"
-          height="100%"
-          align="stretch"
-          minW="180px"
-          overflowY="auto"
-        >
-          <Text fontWeight="bold" mb="2">Intervals</Text>
+        <NavColumn>
+          <Text fontWeight="bold" mb="2">
+            Intervals
+          </Text>
           {intervalNameConstants.map((interval) => (
             <Button
               key={interval}
@@ -103,19 +101,15 @@ export default function IntervalTrainerOptions({ selectedIntervals, selectedOcta
           <Button variant="solid" mt="2" onClick={handleSave}>
             Save
           </Button>
-        </VStack>
+        </NavColumn>
       )}
 
       {/* Octaves panel */}
       {openPanel === "octaves" && (
-        <VStack
-          p="4"
-          borderRightWidth="1px"
-          height="100%"
-          align="stretch"
-          minW="180px"
-        >
-          <Text fontWeight="bold" mb="2">Octaves</Text>
+        <NavColumn>
+          <Text fontWeight="bold" mb="2">
+            Octaves
+          </Text>
           {OCTAVES.map((octave) => (
             <Button
               key={octave}
@@ -125,35 +119,36 @@ export default function IntervalTrainerOptions({ selectedIntervals, selectedOcta
               {octave}
             </Button>
           ))}
-          <Button variant="solid" mt="2" onClick={handleSave}>
+          <Button
+            variant="solid"
+            mt="2"
+            colorPalette="teal"
+            onClick={handleSave}
+          >
             Save
           </Button>
-        </VStack>
+        </NavColumn>
       )}
 
       {/* Play Order panel */}
       {openPanel === "playOrder" && (
-        <VStack
-          p="4"
-          borderRightWidth="1px"
-          height="100%"
-          align="stretch"
-          minW="180px"
-        >
-          <Text fontWeight="bold" mb="2">Play Order</Text>
-          {PLAY_ORDERS.map((order) => (
-            <Button
-              key={order}
-              variant={draftPlayOrder === order ? "solid" : "outline"}
-              onClick={() => setDraftPlayOrder(order)}
-            >
-              {order}
+          <NavColumn>
+            <Text fontWeight="bold" mb="2">
+              Play Order
+            </Text>
+            {PLAY_ORDERS.map((order) => (
+              <Button
+                key={order}
+                variant={draftPlayOrder === order ? "solid" : "outline"}
+                onClick={() => setDraftPlayOrder(order)}
+              >
+                {order}
+              </Button>
+            ))}
+            <Button variant="solid" mt="2" onClick={handleSave}>
+              Save
             </Button>
-          ))}
-          <Button variant="solid" mt="2" onClick={handleSave}>
-            Save
-          </Button>
-        </VStack>
+          </NavColumn>
       )}
     </HStack>
   );

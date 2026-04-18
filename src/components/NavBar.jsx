@@ -10,9 +10,6 @@ export default function NavBar() {
       <Button p="4" bg="grey" flex="6" color="Black">
         Ear Trainer
       </Button>
-      <Button flex="1" bg="grey" color="Black">
-        Settings
-      </Button>
     </Flex>
   )
 }

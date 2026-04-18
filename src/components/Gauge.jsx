@@ -17,8 +17,9 @@ export default function Gauge({
   const [frequency, setFrequency] = useState(null);
 
   useEffect(() => {
-    audioServiceRef.current.onFrequency(setFrequency);
-  }, [audioServiceRef]);
+    const cleanupCallback = audioServiceRef.current.onFrequency(setFrequency);
+    return cleanupCallback
+  }, []);
   
   let cents = null
   if (frequency === -1) {
