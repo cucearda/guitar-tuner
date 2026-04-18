@@ -6,11 +6,7 @@ import IntervalTrainerOptions from "./IntervalTrainerOptions";
 import { useState, useEffect } from "react";
 import { intervalNameConstants } from "../models/interval";
 import IntervalTrainerQuestion from "./IntervalTrainerQuestion";
-import {
-  InstrumentType,
-  Instrument,
-} from "../audio/instrument";
-
+import { InstrumentType, Instrument } from "../audio/instrument";
 
 export default function IntervalTrainerLayout() {
   // Committed selections
@@ -19,16 +15,21 @@ export default function IntervalTrainerLayout() {
   ]);
   const [selectedOctaves, setSelectedOctaves] = useState([3, 4]);
   const [selectedPlayOrder, setSelectedPlayOrder] = useState("Ascending");
-
+  const [instrumentType, setInstrumentType] = useState(InstrumentType.CLASSIC);
   const [instrument, setInstrument] = useState<Instrument | null>(null);
   useEffect(() => {
+    console.log("Instrument type changed:", instrumentType);
     const createInstrument = async () => {
-      const instrument = await Instrument.create(InstrumentType.CLASSIC);
+      let instrument: Instrument | null = null;
+      try {
+        instrument = await Instrument.create(instrumentType);
+      } catch (error) {
+        console.error("Error creating instrument:", error);
+      }
       setInstrument(instrument);
     };
     createInstrument();
-  }, []);
-
+  }, [instrumentType]);
 
   return (
     <Flex height={"100%"}>
@@ -40,15 +41,22 @@ export default function IntervalTrainerLayout() {
           setSelectedIntervals={setSelectedIntervals}
           setSelectedOctaves={setSelectedOctaves}
           setSelectedPlayOrder={setSelectedPlayOrder}
+          selectedInstrumentType={instrumentType}
+          setInstrumentType={setInstrumentType}
         />
       </HStack>
-      <Box position="absolute" top="50%" left="50%" transform="translate(-50%, -50%)">
+      <Box
+        position="absolute"
+        top="50%"
+        left="50%"
+        transform="translate(-50%, -50%)"
+      >
         <IntervalTrainerQuestion
-            selectedIntervals={selectedIntervals}
-            selectedOctaves={selectedOctaves}
-            selectedPlayOrder={selectedPlayOrder}
-            instrument={instrument}
-          />
+          selectedIntervals={selectedIntervals}
+          selectedOctaves={selectedOctaves}
+          selectedPlayOrder={selectedPlayOrder}
+          instrument={instrument}
+        />
       </Box>
     </Flex>
   );

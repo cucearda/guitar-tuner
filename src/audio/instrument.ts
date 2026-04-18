@@ -4,10 +4,11 @@ import { Interval } from "../models/interval";
 const baseUrl = "/guitar-tuner/audio/samples";
 
 enum InstrumentType {
-  PIANO = "piano",
+  // PIANO = "piano",
   CLASSIC = "guitar-nylon",
-  DRUMS = "drums",
-  BASS = "bass",
+  // DRUMS = "drums",
+  // BASS = "bass",
+  VIOLIN = "violin"
 }
 
 class Instrument {
@@ -22,7 +23,6 @@ class Instrument {
     try {
       sampler = new Tone.Sampler({
         urls: {
-          A2: "A2.mp3",
           A3: "A3.mp3",
           A4: "A4.mp3",
           A5: "A5.mp3",

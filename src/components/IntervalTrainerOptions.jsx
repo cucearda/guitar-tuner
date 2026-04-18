@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button, HStack, VStack, Text } from "@chakra-ui/react";
 import { intervalNameConstants } from "../models/interval";
 import NavColumn from "./NavColumn";
+import { InstrumentType } from "../audio/instrument";
 
 const OCTAVES = [1, 2, 3, 4, 5, 6, 7];
 const PLAY_ORDERS = ["Ascending", "Descending"];
@@ -10,9 +11,11 @@ export default function IntervalTrainerOptions({
   selectedIntervals,
   selectedOctaves,
   selectedPlayOrder,
+  selectedInstrumentType,
   setSelectedIntervals,
   setSelectedOctaves,
   setSelectedPlayOrder,
+  setInstrumentType,
 }) {
   const [openPanel, setOpenPanel] = useState(null); // "intervals" | "octaves" | "playOrder" | null
 
@@ -22,6 +25,9 @@ export default function IntervalTrainerOptions({
   ]);
   const [draftOctaves, setDraftOctaves] = useState([3, 4]);
   const [draftPlayOrder, setDraftPlayOrder] = useState("Ascending");
+  const [draftInstrumentType, setDraftInstrumentType] = useState(
+    InstrumentType.CLASSIC,
+  );
 
   const handleOpen = (panel) => {
     if (openPanel === panel) {
@@ -39,6 +45,7 @@ export default function IntervalTrainerOptions({
     if (openPanel === "intervals") setSelectedIntervals(draftIntervals);
     if (openPanel === "octaves") setSelectedOctaves(draftOctaves);
     if (openPanel === "playOrder") setSelectedPlayOrder(draftPlayOrder);
+    if (openPanel === "instrument") setInstrumentType(draftInstrumentType);
     setOpenPanel(null);
   };
 
@@ -80,6 +87,12 @@ export default function IntervalTrainerOptions({
           onClick={() => handleOpen("playOrder")}
         >
           Play Order
+        </Button>
+        <Button
+          variant={openPanel === "instrument" ? "solid" : "outline"}
+          onClick={() => handleOpen("instrument")}
+        >
+          Instrument
         </Button>
       </NavColumn>
 
@@ -132,23 +145,42 @@ export default function IntervalTrainerOptions({
 
       {/* Play Order panel */}
       {openPanel === "playOrder" && (
-          <NavColumn>
-            <Text fontWeight="bold" mb="2">
-              Play Order
-            </Text>
-            {PLAY_ORDERS.map((order) => (
-              <Button
-                key={order}
-                variant={draftPlayOrder === order ? "solid" : "outline"}
-                onClick={() => setDraftPlayOrder(order)}
-              >
-                {order}
-              </Button>
-            ))}
-            <Button variant="solid" mt="2" onClick={handleSave}>
-              Save
+        <NavColumn>
+          <Text fontWeight="bold" mb="2">
+            Play Order
+          </Text>
+          {PLAY_ORDERS.map((order) => (
+            <Button
+              key={order}
+              variant={draftPlayOrder === order ? "solid" : "outline"}
+              onClick={() => setDraftPlayOrder(order)}
+            >
+              {order}
             </Button>
-          </NavColumn>
+          ))}
+          <Button variant="solid" mt="2" onClick={handleSave}>
+            Save
+          </Button>
+        </NavColumn>
+      )}
+      {openPanel === "instrument" && (
+        <NavColumn>
+          <Text fontWeight="bold" mb="2">
+            Octaves
+          </Text>
+          {Object.values(InstrumentType).map((myType) => (
+            <Button
+              key={myType}
+              variant={draftInstrumentType === myType ? "solid" : "outline"}
+              onClick={() => setDraftInstrumentType(myType)}
+            >
+              {myType}
+            </Button>
+          ))}
+          <Button variant="solid" mt="2" onClick={handleSave}>
+            Save
+          </Button>
+        </NavColumn>
       )}
     </HStack>
   );
