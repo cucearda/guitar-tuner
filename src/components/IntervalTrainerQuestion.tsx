@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Grid, Button, Box, GridItem } from "@chakra-ui/react";
+import { Grid, Button, Box, GridItem, Heading } from "@chakra-ui/react";
 import { Interval, intervalNameConstants } from "../models/interval";
 import { IntervalQuestion } from "../models/intervalQuestion";
 import PlayButton from "./PlayButton";
@@ -10,6 +10,10 @@ type Props = {
   selectedOctaves: number[];
   selectedPlayOrder: string;
   instrument: Instrument | null;
+  setTotalGuessesCount: React.Dispatch<React.SetStateAction<number>>;
+  setCorrectGuessesCount: React.Dispatch<React.SetStateAction<number>>;
+  correctGuessesCount: number;
+  totalGuessesCount: number;
 };
 
 export default function IntervalTrainerQuestion(props: Props) {
@@ -39,9 +43,16 @@ export default function IntervalTrainerQuestion(props: Props) {
 
   const [guessedIntervals, setGuessedIntervals] = useState<string[]>([]);
   const handleGuess = (intervalName: string) => {
+    if (guessedIntervals.includes(intervalName)) {
+      return;
+    }
     console.log("Guessed interval:", intervalName);
-    question?.guessInterval(intervalName);
+    const isCorrect = question?.guessInterval(intervalName);
     setGuessedIntervals([...question.guessedIntervals]);
+    if (isCorrect) {
+      props.setCorrectGuessesCount((prev) => prev + 1);
+    }
+    props.setTotalGuessesCount((prev) => prev + 1);
   };
 
   const handleNext = () => {
@@ -71,9 +82,15 @@ export default function IntervalTrainerQuestion(props: Props) {
         gap={4}
         margin={10}
       >
+        <GridItem colSpan={5} display="flex" justifyContent="center">
+          <Box shadow="md" border="1px" justifyContent="center" borderRadius="md" flex={1}>
+            <Heading size="lg" justifyContent="center" alignItems="justify" >Current score: {props.correctGuessesCount}/{props.totalGuessesCount}</Heading>
+          </Box>
+        </GridItem>
+
         {intervalNameConstants.map((intervalName) => {
           if (selectedIntervals.includes(intervalName)) {
-            if (question.guessedIntervals.includes(intervalName)) {
+            if (question.guessedIntervals.includes(intervalName) && intervalName !== question.interval.name) {
               console.log("Interval", intervalName, "was guessed");
               return (
                 <Button key={intervalName} colorPalette="red">

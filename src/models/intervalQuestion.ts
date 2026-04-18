@@ -10,10 +10,15 @@ export class IntervalQuestion {
     this.answeredCorrectly = false;
   }
 
-  guessInterval(guess: string) {
+  guessInterval(guess: string): boolean {
     if (guess === this.interval.name) {
       this.answeredCorrectly = true;
+      this.guessedIntervals.push(guess);
+      return true;
     }
-    else if (!this.guessedIntervals.includes(guess)) this.guessedIntervals.push(guess);
+    else if (!this.guessedIntervals.includes(guess)) {
+      this.guessedIntervals.push(guess);
+    }
+    return false;
   }
 }

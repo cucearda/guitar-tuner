@@ -17,6 +17,9 @@ export default function IntervalTrainerLayout() {
   const [selectedPlayOrder, setSelectedPlayOrder] = useState("Ascending");
   const [instrumentType, setInstrumentType] = useState(InstrumentType.CLASSIC);
   const [instrument, setInstrument] = useState<Instrument | null>(null);
+  const [correctGuessesCount, setCorrectGuessesCount] = useState(0);
+  const [totalGuessesCount, setTotalGuessesCount] = useState(0);
+
   useEffect(() => {
     console.log("Instrument type changed:", instrumentType);
     const createInstrument = async () => {
@@ -56,6 +59,10 @@ export default function IntervalTrainerLayout() {
           selectedOctaves={selectedOctaves}
           selectedPlayOrder={selectedPlayOrder}
           instrument={instrument}
+          setTotalGuessesCount={setTotalGuessesCount}
+          setCorrectGuessesCount={setCorrectGuessesCount}
+          correctGuessesCount={correctGuessesCount}
+          totalGuessesCount={totalGuessesCount}
         />
       </Box>
     </Flex>
